@@ -32,7 +32,7 @@ jobs:
       statuses: write # commit statuses of dispatched runs
     with:
       needs: ${{ toJSON(needs) }}
-      # No flake yet.
+      # No flake yet: dev/flake.nix comes with the code of the atom.
       flake: ""
       renovate-presets: '["flakeyard/renovate-config"]'
       # The default configurations of the atoms apply (FY-0037).
