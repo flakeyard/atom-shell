@@ -52,5 +52,10 @@
           (inputs.import-tree ./nix)
         ];
         _module.args = { inherit root; };
+        # The fixtures fail on purpose; the tests check them.
+        perSystem = {
+          pre-commit.settings.excludes = [ "^dev/fixtures/" ];
+          treefmt.settings.excludes = [ "dev/fixtures/*" ];
+        };
       };
 }

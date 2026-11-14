@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# A script without an extension, selected by its shebang.
+set -euo pipefail
+printf 'hello, %s\n' "${1:-world}"
