@@ -65,10 +65,10 @@ Reading treefmt-nix at `0d6d739a`, git-hooks.nix at `204b6977` and the tools of
   `-x --severity=style` reports nothing. The optional checks `add-default-case`,
   `avoid-negated-conditions`, `avoid-nullary-conditions`, `deprecate-which`,
   `quote-safe-variables`, `require-double-brackets` and `useless-use-of-cat` add
-  3 findings. `require-variable-braces` is a style flakeyard does not use,
-  `check-unassigned-uppercase` reports the variables of runners, and
-  `check-extra-masked-returns` with `check-set-e-suppressed` report about 700
-  findings.
+  3 findings, `require-variable-braces` about 7000, `check-extra-masked-returns`
+  about 600 and `check-set-e-suppressed` about 100; flakeyard's scripts are
+  fixed for all of them before they adopt the atom. `check-unassigned-uppercase`
+  reports the variables of runners and stays off.
 
 ## Decision
 
@@ -101,11 +101,11 @@ has no `.shellcheckrc` at its root, the hook gets the flags of
 
 - `-x`, to follow the files that `source` reads;
 - `--severity=style`, every finding;
-- `--enable=` with the seven optional checks above, each with a comment.
+- `--enable=` with ten of the eleven optional checks, each with a comment.
 
-The four optional checks that are not enabled are listed there with the reason;
-they are candidates for `config/next/`. When the project has a `.shellcheckrc`
-at its root, the hook gets no arguments, so shellcheck reads that file alone;
+The one optional check that is not enabled, `check-unassigned-uppercase`, is
+listed there with the reason. When the project has a `.shellcheckrc` at its
+root, the hook gets no arguments, so shellcheck reads that file alone;
 `external-sources=true` there takes the place of `-x`. A `.shellcheckrc` below
 the root is read by shellcheck next to the flags, as shellcheck defines.
 
@@ -169,8 +169,8 @@ of atom-workspace; the follows error of both inputs; and the next-major warning.
   shellcheck also checks scripts without an extension, which shfmt leaves alone.
 - (−) Every `.envrc` needs a shebang or `# shellcheck shell=bash`; flakeyard's
   repositories add the directive when they adopt the atom.
-- (−) The 3 findings of the optional checks in image-devcontainer are fixed when
-  it adopts the atom.
+- (−) The findings of the optional checks, about 7700 in flakeyard's scripts,
+  are fixed in every repository before it adopts the atom.
 - (−) Locally, a user's `~/.shellcheckrc` applies to the hook when the project
   has no `.shellcheckrc`; the check in the sandbox has none.
 - (±) A project with an `.editorconfig` that says nothing about shell files gets

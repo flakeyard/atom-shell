@@ -95,7 +95,7 @@ belongs to the project:
 
 - shellcheck gets, without a `.shellcheckrc` at the root, the flags of
   [`config/shellcheck.nix`][flags]: `-x`, to follow `source`, `--severity=style`
-  and seven optional checks, each explained there with the four that are not
+  and ten optional checks, each explained there with the one that is not
   enabled. With one, it gets no flags and reads that file alone; write
   `external-sources=true` there to keep what `-x` does.
 - shellcheck reads a `.shellcheckrc` below the root next to the flags, as it
