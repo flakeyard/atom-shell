@@ -181,9 +181,11 @@ Nix store has the tools of the hooks. With Nix on the host, `direnv allow` or
 
 The public [`flake.nix`](flake.nix) holds only the inputs and the module
 ([FY-0017][fy-0017]). [`dev/flake.nix`](dev/flake.nix), with its own lock,
-imports the atom as consumers do, with atom-workspace, and holds the tests:
+imports the atom as consumers do, with [atom-nix][atom-nix] and atom-workspace,
+and holds the tests:
 
 - `shell`, `treefmt`: the atom's checks of this repository;
+- `nix`: the check of atom-nix of this repository;
 - `test-good`, `test-good-format`: a fixture project in
   [`dev/fixtures`](dev/fixtures) whose scripts, one without an extension, pass
   both checks;
@@ -219,9 +221,9 @@ locked revisions ([FY-0038][fy-0038]).
 [`release.yaml`](.github/workflows/release.yaml) releases the repository with
 [workflow-release][workflow-release].
 
-Before a pull request, also run actionlint, zizmor, nixfmt, prettier,
-markdownlint, typos and `reuse lint`; the atoms that will provide them in this
-repository are not adopted or released yet ([FY-0038][fy-0038]).
+Before a pull request, also run actionlint, zizmor, prettier, markdownlint,
+typos and `reuse lint`; the atoms that will provide them in this repository are
+not adopted or released yet ([FY-0038][fy-0038]).
 
 ## License
 
@@ -246,5 +248,6 @@ repository are not adopted or released yet ([FY-0038][fy-0038]).
 [fy-0038]:
   https://github.com/flakeyard/decisions/blob/main/docs/adr/records/0038-roll-out-the-atoms.md
 [versioning]: https://github.com/flakeyard/.github/blob/main/VERSIONING.md
+[atom-nix]: https://github.com/flakeyard/atom-nix
 [workflow-check]: https://github.com/flakeyard/workflow-check
 [workflow-release]: https://github.com/flakeyard/workflow-release
