@@ -1,6 +1,7 @@
 # flakeyard's flags of shellcheck (FY-0037). shellcheck has no configuration
-# file it can be given, so the atom passes these flags when the project has no
-# .shellcheckrc at its root, and none when it has one.
+# file it can be given, so the atom passes these flags when the project has
+# neither .shellcheckrc nor shellcheckrc at its root, and none when it has
+# either.
 let
   # The optional checks that are enabled, each with what it reports.
   enabled = [

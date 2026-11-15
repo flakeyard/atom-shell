@@ -54,11 +54,12 @@ Reading treefmt-nix at `0d6d739a`, git-hooks.nix at `204b6977` and the tools of
   package as a `mkDefault` and no arguments. pre-commit selects the type by the
   file's name, such as `.sh`, `.bash`, `.zsh`, `.envrc` and `direnvrc`, and, for
   an executable file whose name says nothing, by its shebang.
-- shellcheck reads a `.shellcheckrc` in the directory of each script or above
-  it, also when it gets flags; without one it falls back to the user's
-  `~/.shellcheckrc`. It cannot be given a configuration file other than by
-  `--rcfile`, which FY-0037 does not use for it. A `.shellcheckrc` sets
-  `external-sources=true` for what `-x` does on the command line.
+- shellcheck reads a `.shellcheckrc`, or a `shellcheckrc` without the dot, in
+  the directory of each script or above it, also when it gets flags; without one
+  it falls back to the user's `~/.shellcheckrc`. It cannot be given a
+  configuration file other than by `--rcfile`, which FY-0037 does not use for
+  it. A `.shellcheckrc` sets `external-sources=true` for what `-x` does on the
+  command line.
 - shellcheck reports SC2148 on a direnv `.envrc` without a shebang or a
   `# shellcheck shell=bash` directive, since nothing in it names the shell.
 - Over the 299 shell scripts of flakeyard's 20 repositories, without `.envrc`,
@@ -96,18 +97,19 @@ its own for formatting: atom-workspace enables the hook `treefmt`, and
 
 The atom enables the upstream hook `shellcheck` with `pkgs.shellcheck` of the
 consumer and owns it. Its `files` and `types` stay upstream's. When the project
-has no `.shellcheckrc` at its root, the hook gets the flags of
-`config/shellcheck.nix`, the one place they are written:
+has neither `.shellcheckrc` nor `shellcheckrc` at its root, the hook gets the
+flags of `config/shellcheck.nix`, the one place they are written:
 
 - `-x`, to follow the files that `source` reads;
 - `--severity=style`, every finding;
 - `--enable=` with ten of the eleven optional checks, each with a comment.
 
 The one optional check that is not enabled, `check-unassigned-uppercase`, is
-listed there with the reason. When the project has a `.shellcheckrc` at its
-root, the hook gets no arguments, so shellcheck reads that file alone;
-`external-sources=true` there takes the place of `-x`. A `.shellcheckrc` below
-the root is read by shellcheck next to the flags, as shellcheck defines.
+listed there with the reason. When the project has a `.shellcheckrc` or a
+`shellcheckrc` at its root, the hook gets no arguments, so shellcheck reads that
+file alone; `external-sources=true` there takes the place of `-x`. A
+`.shellcheckrc` below the root is read by shellcheck next to the flags, as
+shellcheck defines.
 
 ### Check and shell
 
@@ -137,9 +139,10 @@ Fixture projects import both the same way. Its checks evaluate on x86_64-linux
 and aarch64-linux: a project that passes both checks, with a script without an
 extension; a project that fails shellcheck, also in a script without an
 extension and through an optional check, and fails formatting; a project whose
-`.shellcheckrc` replaces the flags; a project whose `.editorconfig` replaces the
-flags of shfmt; a `.shellcheckrc` below the root; the global excludes; the glue
-of atom-workspace; the follows error of both inputs; and the next-major warning.
+`.shellcheckrc` replaces the flags; a project whose `shellcheckrc` replaces the
+flags; a project whose `.editorconfig` replaces the flags of shfmt; a
+`.shellcheckrc` below the root; the global excludes; the glue of atom-workspace;
+the follows error of both inputs; and the next-major warning.
 
 ## Constraints
 
@@ -147,8 +150,8 @@ of atom-workspace; the follows error of both inputs; and the next-major warning.
   and MUST fail evaluation with the exact follows line when the consumer's input
   of either name has another store path.
 - The atom MUST pass shellcheck the flags of `config/shellcheck.nix` exactly
-  when the project has no `.shellcheckrc` at its root, and no arguments
-  otherwise.
+  when the project has neither `.shellcheckrc` nor `shellcheckrc` at its root,
+  and no arguments otherwise.
 - The atom MUST pass shfmt `-i 2 -ci -bn` exactly when the project has no
   `.editorconfig` at its root, and no formatting flags otherwise.
 - The flags of shellcheck MUST be written in `config/shellcheck.nix` only.
@@ -161,7 +164,7 @@ of atom-workspace; the follows error of both inputs; and the next-major warning.
 ## Consequences
 
 - (+) A project gets the same findings in the git hook, in `nix flake check` and
-  in CI, with flakeyard's flags or its own `.shellcheckrc`.
+  in CI, with flakeyard's flags or its own `.shellcheckrc` or `shellcheckrc`.
 - (+) flakeyard's repositories keep their current formatting; a project that
   writes an `.editorconfig` gets its own.
 - (−) `checks.shell` depends on the whole source, so any change rebuilds it.
@@ -172,7 +175,8 @@ of atom-workspace; the follows error of both inputs; and the next-major warning.
 - (−) The findings of the optional checks, about 7700 in flakeyard's scripts,
   are fixed in every repository before it adopts the atom.
 - (−) Locally, a user's `~/.shellcheckrc` applies to the hook when the project
-  has no `.shellcheckrc`; the check in the sandbox has none.
+  has neither `.shellcheckrc` nor `shellcheckrc`; the check in the sandbox has
+  none.
 - (±) A project with an `.editorconfig` that says nothing about shell files gets
   shfmt's own defaults, tabs, instead of flakeyard's style.
 

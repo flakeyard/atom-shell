@@ -69,9 +69,9 @@ From the project's source, which for a git flake holds only tracked files:
   `*.sh`, `*.bash`, `*.zsh`, `.envrc` and `direnvrc`, and executable files with
   a shell in their shebang; and the files they `source`;
 - for shfmt, through treefmt: `*.sh`, `*.bash`, `*.envrc` and `*.envrc.*`;
-- `.shellcheckrc` at the root, whose presence decides the flags of shellcheck,
-  and every `.shellcheckrc` that shellcheck finds in the directory of a script
-  or above it;
+- `.shellcheckrc` or `shellcheckrc` at the root, whose presence decides the
+  flags of shellcheck, and every `.shellcheckrc` or `shellcheckrc` that
+  shellcheck finds in the directory of a script or above it;
 - `.editorconfig` at the root, whose presence decides the flags of shfmt, and
   the `.editorconfig` files that shfmt reads when it gets no flags.
 
@@ -88,19 +88,19 @@ Neither tool gets a configuration file from the atom ([FY-0037][fy-0037]).
 shellcheck takes flags only, and shfmt is configured by `.editorconfig`, which
 belongs to the project:
 
-| Tool       | Standard path   | Default        | Project's file     |
-| ---------- | --------------- | -------------- | ------------------ |
-| shellcheck | `.shellcheckrc` | [flags][flags] | replaces the flags |
-| shfmt      | `.editorconfig` | `-i 2 -ci -bn` | replaces the flags |
+| Tool       | Standard path     | Default        | Project's file     |
+| ---------- | ----------------- | -------------- | ------------------ |
+| shellcheck | `[.]shellcheckrc` | [flags][flags] | replaces the flags |
+| shfmt      | `.editorconfig`   | `-i 2 -ci -bn` | replaces the flags |
 
-- shellcheck gets, without a `.shellcheckrc` at the root, the flags of
-  [`config/shellcheck.nix`][flags]: `-x`, to follow `source`, `--severity=style`
-  and ten optional checks, each explained there with the one that is not
-  enabled. With one, it gets no flags and reads that file alone; write
-  `external-sources=true` there to keep what `-x` does.
+- shellcheck gets, without a `.shellcheckrc` or `shellcheckrc` at the root, the
+  flags of [`config/shellcheck.nix`][flags]: `-x`, to follow `source`,
+  `--severity=style` and ten optional checks, each explained there with the one
+  that is not enabled. With either, it gets no flags and reads that file alone;
+  write `external-sources=true` there to keep what `-x` does.
 - shellcheck reads a `.shellcheckrc` below the root next to the flags, as it
   defines; it applies to the scripts in that directory and below. Locally,
-  without a `.shellcheckrc` in the project, shellcheck also reads the user's
+  without either file in the project, shellcheck also reads the user's
   `~/.shellcheckrc`; the check runs without one.
 - shfmt gets, without an `.editorconfig` at the root, `-i 2 -ci -bn`: two
   spaces, indented patterns of `case` and binary operators at the start of a
@@ -192,9 +192,10 @@ and holds the tests:
 - `test-bad`, `test-bad-format`: a fixture project that fails shellcheck, also
   in a script without an extension and through an optional check, and fails
   formatting;
-- `test-configs`, `test-configs-project`, `test-configs-editorconfig`,
-  `test-configs-nested`: the flags of both tools, and the project's
-  `.shellcheckrc`, `.editorconfig` and a `.shellcheckrc` below the root;
+- `test-configs`, `test-configs-project`, `test-configs-undotted`,
+  `test-configs-editorconfig`, `test-configs-nested`: the flags of both tools,
+  and the project's `.shellcheckrc`, `shellcheckrc`, `.editorconfig` and a
+  `.shellcheckrc` below the root;
 - `test-excluded`, `test-not-excluded`: the project's global excludes skip the
   failing scripts in the check, and other excludes do not;
 - `test-workspace`: the formatter, the check and the shell with atom-workspace;

@@ -1,9 +1,10 @@
 # The hook shellcheck of git-hooks.nix, which selects shell scripts by type,
 # also those without an extension that start with a shebang and are
 # executable. shellcheck takes flags only (FY-0037): the atom passes
-# flakeyard's flags of config/shellcheck.nix when the project has no
-# .shellcheckrc at its root, and none when it has one, so that shellcheck
-# reads that file alone. The check runs the same entry and arguments.
+# flakeyard's flags of config/shellcheck.nix when the project has neither
+# .shellcheckrc nor shellcheckrc at its root, and none when it has either, so
+# that shellcheck reads that file alone. The check runs the same entry and
+# arguments.
 { root }:
 { self, ... }:
 {
@@ -12,8 +13,11 @@
   config.perSystem =
     { lib, pkgs, ... }:
     let
-      # Tracked files only, for a git flake.
-      shellcheckrc = builtins.pathExists (self.outPath + "/.shellcheckrc");
+      # Tracked files only, for a git flake. shellcheck reads both names.
+      shellcheckrc = lib.any (name: builtins.pathExists (self.outPath + "/${name}")) [
+        ".shellcheckrc"
+        "shellcheckrc"
+      ];
     in
     {
       pre-commit.settings.hooks.shellcheck = {
