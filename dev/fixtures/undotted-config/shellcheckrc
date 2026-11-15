@@ -1,0 +1,3 @@
+# shellcheckrc without the dot, which shellcheck reads like .shellcheckrc,
+# replaces the flags of the atom: no optional checks, and one check disabled.
+disable=SC2086
