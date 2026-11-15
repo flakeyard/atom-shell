@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# A script without an extension: cd without a fallback.
+cd /tmp

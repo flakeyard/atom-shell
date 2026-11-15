@@ -1,0 +1,3 @@
+# A .shellcheckrc below the root: shellcheck reads it next to the flags of the
+# atom.
+disable=SC2292

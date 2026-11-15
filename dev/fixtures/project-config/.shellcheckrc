@@ -1,0 +1,4 @@
+# The project's configuration replaces the flags of the atom: no optional
+# checks, and one check disabled.
+external-sources=true
+disable=SC2086
