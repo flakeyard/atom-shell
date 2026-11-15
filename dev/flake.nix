@@ -15,6 +15,11 @@
       url = "git+https://github.com/cachix/git-hooks.nix?ref=master&rev=204b6977e00caac19e2313015a598543ca7be150&shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    atom-nix = {
+      url = "git+https://github.com/flakeyard/atom-nix?ref=v0&rev=d8e5b1d8f367d27181fbf6e2616c9e6c5ecbbafa&shallow=1";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+      inputs.git-hooks.follows = "git-hooks";
+    };
     atom-workspace.url = "git+https://github.com/flakeyard/atom-workspace?ref=v0&rev=53d4d101ec71025dbb19da3d423455e72e10198a&shallow=1";
     import-tree.url = "git+https://github.com/vic/import-tree?ref=main&rev=eb1b52eaecc57f7c136d07ae8a93e724dfecac46&shallow=1";
   };
@@ -47,6 +52,7 @@
         ];
         imports = [
           atom.flakeModules.default
+          inputs.atom-nix.flakeModules.default
           inputs.atom-workspace.flakeModules.default
           # Every file under nix/ is a flake-parts module.
           (inputs.import-tree ./nix)
