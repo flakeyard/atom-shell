@@ -19,14 +19,17 @@ let
     "require-double-brackets"
     # cat of a single file into a pipe (SC2002).
     "useless-use-of-cat"
+    # $x instead of ${x} (SC2250).
+    "require-variable-braces"
+    # A command substitution whose exit code is lost, such as an argument
+    # $(cmd) of another command (SC2312).
+    "check-extra-masked-returns"
+    # A function called in a condition, where set -e does not apply inside it
+    # (SC2310, SC2311).
+    "check-set-e-suppressed"
   ];
-  # Not enabled, candidates for config/next/:
-  # - require-variable-braces (SC2250): ${x} for every variable is a style
-  #   that flakeyard does not use.
-  # - check-unassigned-uppercase (SC2154): false positives on the variables
-  #   that runners and the environment set.
-  # - check-extra-masked-returns (SC2312), check-set-e-suppressed (SC2310,
-  #   SC2311): about 700 findings in flakeyard's scripts to fix first.
+  # Not enabled: check-unassigned-uppercase (SC2154), which reports the
+  # variables that runners and the environment set.
 in
 [
   # Follow the files that source reads.
