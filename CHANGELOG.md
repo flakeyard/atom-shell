@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/flakeyard/atom-shell/compare/v0.1.1...v0.1.2) (2026-11-17)
+
+
+### Bug Fixes
+
+* take the shared functions from lib-atom ([#12](https://github.com/flakeyard/atom-shell/issues/12)) ([749b00e](https://github.com/flakeyard/atom-shell/commit/749b00e51f4c7a6987bb9966d588e5aebb385dd1))
+
 ## [0.1.1](https://github.com/flakeyard/atom-shell/compare/v0.1.0...v0.1.1) (2026-11-15)
 
 
