@@ -80,6 +80,12 @@ The public flake has two inputs, `treefmt-nix` (numtide/treefmt-nix) and
 atom fails evaluation with the line `inputs.<name>.follows = "<name>";` when the
 consumer's input of that name has another store path.
 
+Amended for [FY-0040][fy-0040]: the public flake also declares `lib-atom`, which
+the atom pins in its own `flake.lock` and consumers neither declare nor follow.
+The check of `follows` and the warning of the next major version are the
+functions `upstream` and `warning` of lib-atom, with the same messages; the atom
+keeps no copy of them.
+
 ### Formatter
 
 The atom enables `programs.shfmt` of treefmt-nix with `pkgs.shfmt` of the
@@ -135,8 +141,12 @@ guide the file names ([FY-0016][fy-0016], [FY-0038][fy-0038]).
 `dev/flake.nix` imports the atom from the flake's own outputs called with the
 dev flake's `treefmt-nix` and `git-hooks`, which is what `follows` gives a
 consumer, together with atom-workspace, and checks this repository with them.
-Fixture projects import both the same way. Its checks evaluate on x86_64-linux
-and aarch64-linux: a project that passes both checks, with a script without an
+Fixture projects import both the same way. As amended for [FY-0040][fy-0040],
+the dev flake fetches the revision of lib-atom that the root `flake.lock` pins,
+gives it to the atom and takes the fixture projects and the tests of `follows`,
+the warning and the glue of atom-workspace from its `internal/testing`, with the
+messages restated in the tests. Its checks evaluate on x86_64-linux and
+aarch64-linux: a project that passes both checks, with a script without an
 extension; a project that fails shellcheck, also in a script without an
 extension and through an optional check, and fails formatting; a project whose
 `.shellcheckrc` replaces the flags; a project whose `shellcheckrc` replaces the
@@ -146,9 +156,9 @@ the follows error of both inputs; and the next-major warning.
 
 ## Constraints
 
-- The public flake MUST declare only the inputs `treefmt-nix` and `git-hooks`,
-  and MUST fail evaluation with the exact follows line when the consumer's input
-  of either name has another store path.
+- The public flake MUST declare only the inputs `treefmt-nix`, `git-hooks` and
+  `lib-atom` ([FY-0040][fy-0040]), and MUST fail evaluation with the exact
+  follows line when the consumer's input of either name has another store path.
 - The atom MUST pass shellcheck the flags of `config/shellcheck.nix` exactly
   when the project has neither `.shellcheckrc` nor `shellcheckrc` at its root,
   and no arguments otherwise.
@@ -208,3 +218,5 @@ the follows error of both inputs; and the next-major warning.
   https://github.com/flakeyard/decisions/blob/main/docs/adr/records/0037-atoms-ship-default-configs-that-projects-replace.md
 [fy-0038]:
   https://github.com/flakeyard/decisions/blob/main/docs/adr/records/0038-roll-out-the-atoms.md
+[fy-0040]:
+  https://github.com/flakeyard/decisions/blob/main/docs/adr/records/0040-share-code-through-lib-repositories.md
