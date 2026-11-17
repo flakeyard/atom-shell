@@ -5,7 +5,7 @@
 # the whole project: the hook selects scripts by their content, not by a
 # `files` pattern, and shellcheck reads the .shellcheckrc of the project and
 # the files that scripts source.
-{ git-hooks }:
+{ git-hooks, warning }:
 { self, ... }:
 {
   _file = ./checks.nix;
@@ -19,13 +19,9 @@
     }:
     let
       inherit (config.pre-commit) settings;
-      warning = import ./warning.nix {
-        inherit (pkgs) lib;
-        file = ./next-major.nix;
-      };
     in
     {
-      checks.shell = warning (
+      checks.shell = warning pkgs.lib (
         git-hooks.lib.${system}.run {
           src = self.outPath;
           # Every option of the project's hook; raw is computed from the

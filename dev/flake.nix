@@ -30,11 +30,37 @@
       # The root of the repository; every other file reaches it as the module
       # argument root.
       root = ../.;
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+      # The loader of lib-atom (FY-0040): the source of the revision that the
+      # atom's root flake.lock pins, so that the atom has one pin of it.
+      lock = builtins.fromJSON (builtins.readFile (root + "/flake.lock"));
+      lib-atom-source = builtins.fetchTree lock.nodes.${lock.nodes.root.inputs.lib-atom}.locked;
+      lib-atom = (import (lib-atom-source + "/flake.nix")).outputs { };
       # The atom as a consumer gets it with the follows lines of treefmt-nix
-      # and git-hooks: its flake's outputs over this flake's copies. An input
-      # path:.. would leave the directory of this flake, which the pin form
-      # of action-flake-lock forbids for path inputs.
-      atom = (import (root + "/flake.nix")).outputs { inherit (inputs) treefmt-nix git-hooks; };
+      # and git-hooks: its flake's outputs over this flake's copies and its
+      # own lib-atom, unless given. An input path:.. would leave the
+      # directory of this flake, which the pin form of action-flake-lock
+      # forbids for path inputs.
+      atomFor =
+        given:
+        (import (root + "/flake.nix")).outputs (
+          {
+            inherit (inputs) treefmt-nix git-hooks;
+            inherit lib-atom;
+          }
+          // given
+        );
+      # The helpers of the tests, from the same revision of lib-atom; every
+      # fixture project imports atom-workspace.
+      testing = import (lib-atom-source + "/internal/testing") {
+        inherit inputs root systems;
+        atom = atomFor;
+        imports = [ inputs.atom-workspace.flakeModules.default ];
+        lib-atom = lib-atom.lib;
+      };
     in
     inputs.flake-parts.lib.mkFlake
       {
@@ -46,18 +72,18 @@
         };
       }
       {
-        systems = [
-          "x86_64-linux"
-          "aarch64-linux"
-        ];
+        inherit systems;
         imports = [
-          atom.flakeModules.default
+          (atomFor { }).flakeModules.default
           inputs.atom-nix.flakeModules.default
           inputs.atom-workspace.flakeModules.default
           # Every file under nix/ is a flake-parts module.
           (inputs.import-tree ./nix)
         ];
-        _module.args = { inherit root; };
+        _module.args = {
+          inherit root testing;
+          inherit (testing) facts fixture;
+        };
         # The fixtures fail on purpose; the tests check them.
         perSystem = {
           pre-commit.settings.excludes = [ "^dev/fixtures/" ];

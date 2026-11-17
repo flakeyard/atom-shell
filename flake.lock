@@ -19,7 +19,10 @@
     "git-hooks": {
       "inputs": {
         "flake-compat": "flake-compat",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": [
+          "treefmt-nix",
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1793686154,
@@ -38,23 +41,25 @@
         "url": "https://github.com/cachix/git-hooks.nix"
       }
     },
-    "nixpkgs": {
+    "lib-atom": {
       "locked": {
-        "lastModified": 1787631388,
-        "narHash": "sha256-vMiXptXarfSdJb1Gkc+FYVOAibuBRj7qxGa8z68q1Uw=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "ac6b2166e7a9375683b8e98f860f273222337b16",
-        "type": "github"
+        "lastModified": 1794902163,
+        "narHash": "sha256-cD6ZkxNK0x+wGVL9OZPU+QohKfaBPvTr9AZnWUS8spQ=",
+        "ref": "v0",
+        "rev": "f2c83b7399315afb477abba1e112bca107f0b345",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/flakeyard/lib-atom"
       },
       "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
+        "ref": "v0",
+        "rev": "f2c83b7399315afb477abba1e112bca107f0b345",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/flakeyard/lib-atom"
       }
     },
-    "nixpkgs_2": {
+    "nixpkgs": {
       "locked": {
         "lastModified": 1790149054,
         "narHash": "sha256-FfjXg6mAzKQBCY+7V9keGWOXG4DV2Eym/qA987lFl8A=",
@@ -73,12 +78,13 @@
     "root": {
       "inputs": {
         "git-hooks": "git-hooks",
+        "lib-atom": "lib-atom",
         "treefmt-nix": "treefmt-nix"
       }
     },
     "treefmt-nix": {
       "inputs": {
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs"
       },
       "locked": {
         "lastModified": 1791885023,
