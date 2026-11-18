@@ -36,7 +36,8 @@ jobs:
       expect-checks: >-
         ["data-formats","markdown","nix","shell","test-bad",
         "test-bad-format","test-configs","test-configs-editorconfig",
-        "test-configs-nested","test-configs-project","test-excluded",
+        "test-configs-editorconfig-assert","test-configs-nested",
+        "test-configs-project","test-excluded",
         "test-follows","test-good","test-good-format","test-next-major",
         "test-not-excluded","test-workspace","text","treefmt"]
       # Weekly, the app that needs the network: the links of the Markdown files.
@@ -49,6 +50,8 @@ jobs:
                  "git-hooks": "github:cachix/git-hooks.nix/master",
                  "flake-parts": "github:hercules-ci/flake-parts/main"}'
             || '{}' }}
+      # The test of .editorconfig on a second revision of treefmt-nix.
+      allow-duplicates: '["github.com/numtide/treefmt-nix"]'
       renovate-presets: '["flakeyard/renovate-config"]'
       # The default configurations of the atoms apply (FY-0037).
       forbid-tool-configs: true
