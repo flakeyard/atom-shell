@@ -11,6 +11,13 @@
       url = "git+https://github.com/numtide/treefmt-nix?ref=main&rev=0d6d739a833ba9a9c93034862e4a7b061a062a1c&shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # A later revision of treefmt-nix, whose module of shfmt asserts on its
+    # own options while useEditorConfig is true; only the test of
+    # .editorconfig on it uses this input.
+    treefmt-nix-assert = {
+      url = "git+https://github.com/numtide/treefmt-nix?ref=main&rev=0ba5d67225c3f5c88eb134e1a665a379bfd3bea9&shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     git-hooks = {
       url = "git+https://github.com/cachix/git-hooks.nix?ref=master&rev=204b6977e00caac19e2313015a598543ca7be150&shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -53,28 +60,33 @@
       lock = builtins.fromJSON (builtins.readFile (root + "/flake.lock"));
       lib-atom-source = builtins.fetchTree lock.nodes.${lock.nodes.root.inputs.lib-atom}.locked;
       lib-atom = (import (lib-atom-source + "/flake.nix")).outputs { };
-      # The atom as a consumer gets it with the follows lines of treefmt-nix
-      # and git-hooks: its flake's outputs over this flake's copies and its
-      # own lib-atom, unless given. An input path:.. would leave the
-      # directory of this flake, which the pin form of action-flake-lock
-      # forbids for path inputs.
+      # The atom as a consumer with the inputs projectInputs gets it with
+      # the follows lines of treefmt-nix and git-hooks: its flake's outputs
+      # over the consumer's copies and its own lib-atom, unless given. An
+      # input path:.. would leave the directory of this flake, which the pin
+      # form of action-flake-lock forbids for path inputs.
       atomFor =
-        given:
+        projectInputs: given:
         (import (root + "/flake.nix")).outputs (
           {
-            inherit (inputs) treefmt-nix git-hooks;
+            inherit (projectInputs) treefmt-nix git-hooks;
             inherit lib-atom;
           }
           // given
         );
-      # The helpers of the tests, from the same revision of lib-atom; every
-      # fixture project imports atom-workspace.
-      testing = import (lib-atom-source + "/internal/testing") {
-        inherit inputs root systems;
-        atom = atomFor;
-        imports = [ inputs.atom-workspace.flakeModules.default ];
-        lib-atom = lib-atom.lib;
-      };
+      # The helpers of the tests for fixture projects with the inputs
+      # projectInputs, from the same revision of lib-atom; every fixture
+      # project imports atom-workspace.
+      testingFor =
+        projectInputs:
+        import (lib-atom-source + "/internal/testing") {
+          inherit root systems;
+          inputs = projectInputs;
+          atom = atomFor projectInputs;
+          imports = [ inputs.atom-workspace.flakeModules.default ];
+          lib-atom = lib-atom.lib;
+        };
+      testing = testingFor inputs;
     in
     inputs.flake-parts.lib.mkFlake
       {
@@ -88,7 +100,7 @@
       {
         inherit systems;
         imports = [
-          (atomFor { }).flakeModules.default
+          (atomFor inputs { }).flakeModules.default
           inputs.atom-data-formats.flakeModules.default
           inputs.atom-markdown.flakeModules.default
           inputs.atom-nix.flakeModules.default
@@ -100,6 +112,9 @@
         _module.args = {
           inherit root testing;
           inherit (testing) facts fixture;
+          # fixtureOn upstream: fixture for projects whose inputs upstream
+          # replace those of this flake, such as treefmt-nix.
+          fixtureOn = upstream: (testingFor (inputs // upstream)).fixture;
         };
         # The fixtures fail on purpose; the tests check them.
         perSystem = {

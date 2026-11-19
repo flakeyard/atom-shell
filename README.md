@@ -68,14 +68,21 @@ atom-shell: input 'git-hooks' is locked twice; add to input atom-shell:
 From the project's source, which for a git flake holds only tracked files:
 
 - shell scripts, as pre-commit selects the type `shell`: by name, such as
-  `*.sh`, `*.bash`, `*.zsh`, `.envrc` and `direnvrc`, and executable files with
-  a shell in their shebang; and the files they `source`;
+  `*.sh`, `*.bash`, `.envrc` and `direnvrc`, and executable files with a shell
+  in their shebang; and the files they `source`;
 - for shfmt, through treefmt: `*.sh`, `*.bash`, `*.envrc` and `*.envrc.*`;
 - `.shellcheckrc` or `shellcheckrc` at the root, whose presence decides the
   flags of shellcheck, and every `.shellcheckrc` or `shellcheckrc` that
   shellcheck finds in the directory of a script or above it;
 - `.editorconfig` at the root, whose presence decides the flags of shfmt, and
   the `.editorconfig` files that shfmt reads when it gets no flags.
+
+shellcheck cannot parse zsh, so the hook skips the files that pre-commit tags
+`zsh`: `*.zsh`, `.zshrc`, `.zprofile`, `.zshenv`, `.zlogin`, `.zlogout` and
+executables with a zsh shebang. A project excludes other files from the hook and
+the check with `perSystem.pre-commit.settings.excludes`, for every hook, or
+`perSystem.pre-commit.settings.hooks.shellcheck.excludes`, for shellcheck alone:
+lists of regular expressions on paths, such as `[ "^vendor/" ]`.
 
 A direnv `.envrc` names no shell, so shellcheck needs a directive in it:
 
@@ -132,7 +139,8 @@ at plain priority; a project adds to that list, and replaces it with
 ## Outputs
 
 - `flakeModules.default`: the module. It adds to every system:
-  - the hook `shellcheck`, enabled, with the package of the project's nixpkgs;
+  - the hook `shellcheck`, enabled, with the package of the project's nixpkgs
+    and the type `zsh` excluded;
   - the formatter `shfmt` of treefmt, enabled, with the package of the project's
     nixpkgs;
   - `checks.shell`: the hook, run by pre-commit through `lib.<system>.run` of
@@ -159,10 +167,10 @@ Releases follow [semantic versioning][versioning] ([FY-0024][fy-0024]). The
 public API is the inputs `treefmt-nix` and `git-hooks`, `flakeModules.default`,
 the hook `shellcheck` and the formatter `shfmt`, the values the atom sets whose
 change rewrites files or fails a project that passed before (the flags of
-shellcheck and shfmt), the files it reads, the outputs `checks.shell` and
-`devShells.flakeyard-shell`, the supported systems and the oldest supported
-upstream revisions. Versions of shellcheck and shfmt come from the project's
-nixpkgs and are not part of it.
+shellcheck and shfmt, the type `zsh` that the hook skips), the files it reads,
+the outputs `checks.shell` and `devShells.flakeyard-shell`, the supported
+systems and the oldest supported upstream revisions. Versions of shellcheck and
+shfmt come from the project's nixpkgs and are not part of it.
 
 The last minor release before a major one contains `nix/next-major.nix`; while
 it exists, the check and the shell warn at evaluation that the next major
@@ -194,12 +202,15 @@ atom-workspace, and holds the tests:
   [`dev/fixtures`](dev/fixtures) whose scripts, one without an extension, pass
   both checks;
 - `test-bad`, `test-bad-format`: a fixture project that fails shellcheck, also
-  in a script without an extension and through an optional check, and fails
-  formatting;
+  in a script without an extension and through an optional check, but not in its
+  files of zsh, and fails formatting;
 - `test-configs`, `test-configs-project`, `test-configs-undotted`,
   `test-configs-editorconfig`, `test-configs-nested`: the flags of both tools,
   and the project's `.shellcheckrc`, `shellcheckrc`, `.editorconfig` and a
   `.shellcheckrc` below the root;
+- `test-configs-editorconfig-assert`: the project's `.editorconfig` on the input
+  `treefmt-nix-assert`, a later revision of treefmt-nix whose module of shfmt
+  fails with infinite recursion while `useEditorConfig` is true;
 - `test-excluded`, `test-not-excluded`: the project's global excludes skip the
   failing scripts in the check, and other excludes do not;
 - `test-workspace`: the formatter, the check and the shell with atom-workspace;
