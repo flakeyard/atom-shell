@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.4](https://github.com/flakeyard/atom-shell/compare/v0.1.3...v0.1.4) (2026-11-19)
+
+
+### Bug Fixes
+
+* **deps:** update flake input lib-atom to 99d4af0 ([#31](https://github.com/flakeyard/atom-shell/issues/31)) ([bfbad72](https://github.com/flakeyard/atom-shell/commit/bfbad7255e404a070c39ae6e1192dcdec5d08a35))
+* leave useEditorConfig unset and skip zsh in shellcheck ([#27](https://github.com/flakeyard/atom-shell/issues/27)) ([7ab5fac](https://github.com/flakeyard/atom-shell/commit/7ab5fac12259389f13be00b18c902a0470f6be12))
+
 ## [0.1.3](https://github.com/flakeyard/atom-shell/compare/v0.1.2...v0.1.3) (2026-11-18)
 
 

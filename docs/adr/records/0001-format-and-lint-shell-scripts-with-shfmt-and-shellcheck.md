@@ -50,10 +50,21 @@ Reading treefmt-nix at `0d6d739a`, git-hooks.nix at `204b6977` and the tools of
   `-bn`; extra flags go into `settings.formatter.shfmt.options`, a list it
   defines at plain priority. shfmt reads `.editorconfig` only when it gets no
   formatting flags.
+- treefmt-nix at `0ba5d67225c3f5c88eb134e1a665a379bfd3bea9` defaults
+  `indent_size` to none and `simplify` to false, and its assertion for
+  `useEditorConfig` reads `settings.formatter.shfmt.options`, the option whose
+  value it defines: while `useEditorConfig` is true, evaluation fails with
+  infinite recursion. With `useEditorConfig` false and neither `indent_size` nor
+  `simplify` set, both revisions pass shfmt no formatting flags.
 - git-hooks.nix defines the hook `shellcheck` with `types = [ "shell" ]`, its
-  package as a `mkDefault` and no arguments. pre-commit selects the type by the
-  file's name, such as `.sh`, `.bash`, `.zsh`, `.envrc` and `direnvrc`, and, for
-  an executable file whose name says nothing, by its shebang.
+  package as a `mkDefault`, no arguments and no `exclude_types`. pre-commit
+  selects the type by the file's name, such as `.sh`, `.bash`, `.zsh`, `.envrc`
+  and `direnvrc`, and, for an executable file whose name says nothing, by its
+  shebang.
+- pre-commit (identify 2.6.19) tags `*.zsh`, `.zshrc`, `.zprofile`, `.zshenv`,
+  `.zlogin`, `.zlogout` and executables with a zsh shebang as both `shell` and
+  `zsh`. shellcheck cannot parse zsh: it reports SC1071 on a zsh shebang, and
+  without one SC2148 and findings on zsh syntax that are not errors in zsh.
 - shellcheck reads a `.shellcheckrc`, or a `shellcheckrc` without the dot, in
   the directory of each script or above it, also when it gets flags; without one
   it falls back to the user's `~/.shellcheckrc`. It cannot be given a
@@ -92,19 +103,27 @@ The atom enables `programs.shfmt` of treefmt-nix with `pkgs.shfmt` of the
 consumer. When the project has no `.editorconfig` at its root, it passes
 flakeyard's style, the style of every flakeyard repository: `indent_size = 2`,
 `simplify = false` and the options `-ci` and `-bn`, so shfmt gets
-`-i 2 -ci -bn`. When the project has one, it sets `useEditorConfig = true` and
-passes no options, so `.editorconfig` replaces the default wholly. The options
-are a plain definition, as FY-0017 requires for a list upstream defines at plain
-priority; the other values use `lib.mkOverride 900`. The atom adds no hook of
-its own for formatting: atom-workspace enables the hook `treefmt`, and
+`-i 2 -ci -bn`. When the project has one, it sets `indent_size = null` and
+`simplify = false` and passes no options, so shfmt gets no formatting flags and
+`.editorconfig` replaces the default wholly. Amended: the atom leaves
+`useEditorConfig` unset, false, since later revisions of treefmt-nix fail with
+infinite recursion while it is true and it adds nothing to the empty flags. The
+options are a plain definition, as FY-0017 requires for a list upstream defines
+at plain priority; the other values use `lib.mkOverride 900`. The atom adds no
+hook of its own for formatting: atom-workspace enables the hook `treefmt`, and
 `checks.treefmt` checks formatting.
 
 ### Linter
 
 The atom enables the upstream hook `shellcheck` with `pkgs.shellcheck` of the
-consumer and owns it. Its `files` and `types` stay upstream's. When the project
-has neither `.shellcheckrc` nor `shellcheckrc` at its root, the hook gets the
-flags of `config/shellcheck.nix`, the one place they are written:
+consumer and owns it. Its `files` and `types` stay upstream's. Amended: the hook
+gets `exclude_types = [ "zsh" ]` with `lib.mkOverride 900`, since git-hooks.nix
+leaves the list at its default, so pre-commit skips the files of zsh, which
+shellcheck cannot parse, in the hook and in the check alike. A project excludes
+other files with `pre-commit.settings.excludes` or
+`pre-commit.settings.hooks.shellcheck.excludes`. When the project has neither
+`.shellcheckrc` nor `shellcheckrc` at its root, the hook gets the flags of
+`config/shellcheck.nix`, the one place they are written:
 
 - `-x`, to follow the files that `source` reads;
 - `--severity=style`, every finding;
@@ -148,9 +167,11 @@ the warning and the glue of atom-workspace from its `internal/testing`, with the
 messages restated in the tests. Its checks evaluate on x86_64-linux and
 aarch64-linux: a project that passes both checks, with a script without an
 extension; a project that fails shellcheck, also in a script without an
-extension and through an optional check, and fails formatting; a project whose
-`.shellcheckrc` replaces the flags; a project whose `shellcheckrc` replaces the
-flags; a project whose `.editorconfig` replaces the flags of shfmt; a
+extension and through an optional check, and fails formatting, next to files of
+zsh that it does not report; a project whose `.shellcheckrc` replaces the flags;
+a project whose `shellcheckrc` replaces the flags; a project whose
+`.editorconfig` replaces the flags of shfmt, also on a second input of
+treefmt-nix at a revision whose assertion reads its own options (amended); a
 `.shellcheckrc` below the root; the global excludes; the glue of atom-workspace;
 the follows error of both inputs; and the next-major warning.
 
@@ -164,6 +185,8 @@ the follows error of both inputs; and the next-major warning.
   and no arguments otherwise.
 - The atom MUST pass shfmt `-i 2 -ci -bn` exactly when the project has no
   `.editorconfig` at its root, and no formatting flags otherwise.
+- The atom MUST NOT set `useEditorConfig` of treefmt-nix.
+- The hook `shellcheck` MUST skip the type `zsh`.
 - The flags of shellcheck MUST be written in `config/shellcheck.nix` only.
 - `checks.shell` MUST be built with `lib.<system>.run` of git-hooks.nix from
   only the hook `shellcheck` and the project's global excludes, and the atom
@@ -187,6 +210,7 @@ the follows error of both inputs; and the next-major warning.
 - (−) Locally, a user's `~/.shellcheckrc` applies to the hook when the project
   has neither `.shellcheckrc` nor `shellcheckrc`; the check in the sandbox has
   none.
+- (−) Scripts of zsh are neither linted nor formatted.
 - (±) A project with an `.editorconfig` that says nothing about shell files gets
   shfmt's own defaults, tabs, instead of flakeyard's style.
 
@@ -200,6 +224,12 @@ the follows error of both inputs; and the next-major warning.
   owner of shfmt next to treefmt ([FY-0017][fy-0017]).
 - **`simplify`, treefmt-nix's default.** `-s` would rewrite scripts of
   flakeyard's repositories that pass today.
+- **`useEditorConfig = true` with an `.editorconfig`.** It passes no flags the
+  atom does not already leave out, and later revisions of treefmt-nix fail
+  evaluation with infinite recursion while it is set.
+- **Excluding zsh files by name.** The type `zsh` of pre-commit also covers the
+  startup files and executables with a zsh shebang, which a pattern of names
+  misses.
 - **Excluding `.envrc` from the hook.** direnv files are bash and are worth
   checking; one directive makes them pass.
 - **A coarse filter of the check's source by file extensions.** It would select

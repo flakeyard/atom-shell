@@ -6,6 +6,8 @@
 {
   facts,
   fixture,
+  fixtureOn,
+  inputs,
   root,
   ...
 }:
@@ -18,6 +20,10 @@
       args = name: (project name).pre-commit.settings.hooks.shellcheck.args;
       shfmt = name: lib.sort lib.lessThan (project name).treefmt.settings.formatter.shfmt.options;
       check = name: check: (fixture { inherit name; }).checks.${system}.${check};
+      # The project with .editorconfig on the revision of treefmt-nix whose
+      # module of shfmt asserts on its own options while useEditorConfig is
+      # true, which the atom therefore leaves unset.
+      asserting = fixtureOn { treefmt-nix = inputs.treefmt-nix-assert; } { name = "editorconfig"; };
     in
     {
       checks = {
@@ -36,6 +42,8 @@
               "-bn"
             ];
           "with .editorconfig, shfmt gets no formatting flags" = shfmt "editorconfig" == [ "-w" ];
+          "with .editorconfig on treefmt-nix-assert, shfmt gets no formatting flags" =
+            asserting.allSystems.${system}.treefmt.settings.formatter.shfmt.options == [ "-w" ];
         };
         # The scripts pass only with the project's files: the .shellcheckrc
         # and the shellcheckrc disable a check and enable no optional one;
@@ -46,6 +54,7 @@
         test-configs-project = check "project-config" "shell";
         test-configs-undotted = check "undotted-config" "shell";
         test-configs-editorconfig = check "editorconfig" "treefmt";
+        test-configs-editorconfig-assert = asserting.checks.${system}.treefmt;
         test-configs-nested = check "nested-config" "shell";
       };
     };

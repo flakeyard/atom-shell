@@ -16,9 +16,10 @@
       treefmt.programs.shfmt = {
         enable = lib.mkOverride 900 true;
         package = lib.mkOverride 900 pkgs.shfmt;
-        # treefmt-nix passes -i for indent_size and -s for simplify, and
-        # neither while useEditorConfig is true.
-        useEditorConfig = lib.mkOverride 900 editorconfig;
+        # treefmt-nix passes -i for indent_size and -s for simplify. The atom
+        # leaves useEditorConfig unset, false: it passes no flags either, and
+        # later revisions of treefmt-nix fail with infinite recursion while it
+        # is true, since its assertion reads the options it defines.
         indent_size = lib.mkOverride 900 (if editorconfig then null else 2);
         simplify = lib.mkOverride 900 false;
       };

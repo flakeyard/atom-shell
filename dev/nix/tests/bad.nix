@@ -1,7 +1,8 @@
 # A project whose scripts fail: checks.shell reports the findings of
 # shellcheck, also in a script without an extension that pre-commit selects
 # by its shebang and in a script that only an optional check of the atom
-# flags; checks.treefmt reports the script that shfmt would change.
+# flags, but not in the files of zsh, which shellcheck cannot parse;
+# checks.treefmt reports the script that shfmt would change.
 { fixture, ... }:
 {
   perSystem =
@@ -21,6 +22,8 @@
         grep -F 'In optional.sh line 3:' "$log"
         grep -F 'SC2292' "$log"
         if grep -F 'unformatted.sh' "$log"; then exit 1; fi
+        if grep -F 'init.zsh' "$log"; then exit 1; fi
+        if grep -F '.zshrc' "$log"; then exit 1; fi
         touch $out
       '';
       checks.test-bad-format = pkgs.runCommand "test-bad-format" { } ''
