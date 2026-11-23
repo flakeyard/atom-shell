@@ -5,7 +5,7 @@
   # lib-atom is pinned by the atom in its own flake.lock; consumers neither
   # declare nor follow it (FY-0040).
   inputs = {
-    treefmt-nix.url = "git+https://github.com/numtide/treefmt-nix?ref=main&rev=0d6d739a833ba9a9c93034862e4a7b061a062a1c&shallow=1";
+    treefmt-nix.url = "git+https://github.com/numtide/treefmt-nix?ref=main&rev=a0a97e31a897a3537eea5c49df4f8adaa83b3b37&shallow=1";
     git-hooks = {
       url = "git+https://github.com/cachix/git-hooks.nix?ref=master&rev=204b6977e00caac19e2313015a598543ca7be150&shallow=1";
       # One nixpkgs in the atom's own lock, which action-flake-lock checks
