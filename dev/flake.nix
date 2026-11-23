@@ -15,7 +15,7 @@
     # own options while useEditorConfig is true; only the test of
     # .editorconfig on it uses this input.
     treefmt-nix-assert = {
-      url = "git+https://github.com/numtide/treefmt-nix?ref=main&rev=0ba5d67225c3f5c88eb134e1a665a379bfd3bea9&shallow=1";
+      url = "git+https://github.com/numtide/treefmt-nix?ref=main&rev=a0a97e31a897a3537eea5c49df4f8adaa83b3b37&shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     git-hooks = {
